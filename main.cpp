@@ -264,7 +264,7 @@ void bariTriangle(
 					//Interpolates depth value
 					float depth = z1 * t1 + z2 * t2 + z3 * t3;
 #else
-					
+
 					//perspective correctenss				
 
 					auto ap = q1 * t1;
@@ -276,12 +276,12 @@ void bariTriangle(
 					//Interpolate uv values to find the pixel uv using baricenteric coordinates
 					float u = (ap * uv1.x + bp * uv2.x + cp * uv3.x) * inv;
 					float v = (ap * uv1.y + bp * uv2.y + cp * uv3.y) * inv;
-				
+
 					//Interpolates depth value
-					float depth = (ap * z1 + bp * z2 + cp * z3) * inv;					
+					float depth = (ap * z1 + bp * z2 + cp * z3) * inv;
 #endif			
 
-					
+
 
 #ifndef DEBUG_DEPTH
 					if (depthBuffer->get(x, y) > depth) {
@@ -290,7 +290,7 @@ void bariTriangle(
 					}
 
 #else
-					
+
 					int colorized_depth = (depth * 255);
 
 					Color c;
@@ -300,7 +300,7 @@ void bariTriangle(
 						depthBuffer->set(x, y, depth);
 						putPixel(x, y, c);
 					}
-					
+
 #endif						
 
 				}
@@ -335,7 +335,7 @@ void rasterize(std::vector<Vertex> vertices, Camera& camera, std::function<Color
 			continue;
 		}
 		*/
-		
+
 
 		auto v1 = camera.vp() * glm::highp_vec4(p1, 1.0f);
 		auto v2 = camera.vp() * glm::highp_vec4(p2, 1.0f);
@@ -360,9 +360,11 @@ void rasterize(std::vector<Vertex> vertices, Camera& camera, std::function<Color
 		v2 = (v2 + 1.0f) * 0.5f;
 		v3 = (v3 + 1.0f) * 0.5f;
 
-		float z1 = (p1.z + 2.f) * 0.25f;
-		float z2 = (p2.z + 2.f) * 0.25f;
-		float z3 = (p3.z + 2.f) * 0.25f;
+		float z1 = ((camera.v() * glm::vec4(p1, 1.f)).z) / (camera.far()-camera.near());
+		float z2 = ((camera.v() * glm::vec4(p2, 1.f)).z) / (camera.far() - camera.near());
+		float z3 = ((camera.v() * glm::vec4(p3, 1.f)).z) / (camera.far() - camera.near());
+
+		//std::cout << z1 << std::endl;
 
 		//Draw a triangle using baricentric coordinate
 		bariTriangle(
@@ -415,7 +417,7 @@ int main(int argc, char* argv[])
 		if (SDL_PollEvent(&ev)) {
 			if (ev.type == SDL_QUIT)
 				break;
-			if (ev.type == SDL_KEYDOWN ) {
+			if (ev.type == SDL_KEYDOWN) {
 
 				if (ev.key.keysym.sym == SDLK_w) {
 					if (polygonMode == PolygonMode::Fill)
@@ -439,10 +441,10 @@ int main(int argc, char* argv[])
 
 			if (!paused) {
 				camera.rotateAroundTarget(deltaTime * 60);
-				
+
 			}
 			ticks = SDL_GetTicks();
-			
+
 			begin();
 			clear(clearColor);
 			depthBuffer->clear(10000.f);
@@ -452,7 +454,7 @@ int main(int argc, char* argv[])
 			for (const auto& mesh : meshes) {
 				rasterize(mesh.vertices, camera, [](glm::fvec2 uv, float depth) {
 					return roomTexture->readColor(uv);
-				});
+					});
 			}
 
 			end();
