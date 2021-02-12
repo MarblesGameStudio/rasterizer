@@ -212,7 +212,7 @@ __forceinline int edgeFunction(glm::ivec2 v1, glm::ivec2 v2, glm::ivec2 v3) {
 /*
 Use baricentric coordinates to draw a triangle and fill in
 */
-void bariTriangle(
+__forceinline void bariTriangle(
 	const glm::vec4& v1, const glm::vec4& v2, const glm::vec4& v3,
 	const glm::vec2& uv1, const glm::vec2& uv2, const glm::vec2& uv3,
 	float q1, float q2, float q3,
@@ -411,7 +411,7 @@ int main(int argc, char* argv[])
 
 	depthBuffer = new DepthBuffer(framebuffer->w, framebuffer->h, 1.f);
 
-	Camera camera(39.6f, framebuffer->w / (float)framebuffer->h, 0.1f, 10.0f);
+	Camera camera(39.6f, framebuffer->w / (float)framebuffer->h, 0.01f, 100.0f);
 	camera.moveTo(4.f, 4.f, -4.f);
 
 
@@ -422,6 +422,8 @@ int main(int argc, char* argv[])
 	roomTexture = new Texture(std::string("texture.png"));
 
 	do {
+		auto renderPerformance = SDL_GetTicks();
+
 		if (SDL_PollEvent(&ev)) {
 			if (ev.type == SDL_QUIT)
 				break;
@@ -454,7 +456,7 @@ int main(int argc, char* argv[])
 			}
 			ticks = SDL_GetTicks();
 
-			auto renderPerformance = SDL_GetTicks();
+			
 
 			begin();
 			clear(clearColor);
@@ -465,19 +467,19 @@ int main(int argc, char* argv[])
 			for (const auto& mesh : meshes) {
 				rasterize(mesh.vertices, camera, [](glm::fvec2 uv, float depth) {
 					return roomTexture->readColor(uv);
-					});
+				});
 			}
 
-			end();
-
-			renderPerformance = SDL_GetTicks() - renderPerformance;
-			std::cout << "render perf:" << renderPerformance << std::endl;
-
-			auto persentPerformance = SDL_GetTicks();			
+			end();			
+					
 			present();
-			persentPerformance = SDL_GetTicks() - persentPerformance;
-			std::cout << "present perf:" << persentPerformance << std::endl;
+						
 		}
+
+		renderPerformance = SDL_GetTicks() - renderPerformance;
+		if (renderPerformance <= 0)
+			renderPerformance = 1;
+		std::cout << "render perf:" << 1000 / renderPerformance << std::endl;
 	} while (true);
 
 	return 0;
