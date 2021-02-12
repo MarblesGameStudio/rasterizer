@@ -194,8 +194,14 @@ enum struct PolygonMode {
 	Line
 };
 
+enum struct CullingMode {
+	BackFace,
+	Disabled
+};
+
 
 PolygonMode polygonMode = PolygonMode::Fill;
+CullingMode cullingMode = CullingMode::Disabled;
 
 
 
@@ -241,20 +247,19 @@ void bariTriangle(
 
 				//Now texture it with uv we found
 
-				if (c1 >= 0 && c2 >= 0 && c3 >= 0) {
-					//The value of lambda multiplies in baricenteric coordinates
+				//The value of lambda multiplies in baricenteric coordinates
 
-					auto t1 = c1 * areaInverse;
-					auto t2 = c2 * areaInverse;
+				auto t1 = c1 * areaInverse;
+				auto t2 = c2 * areaInverse;
 
-					//we can calculate t3 by this formula t3 = 1- t1 - t2
-					//so instead of t3 = c3 / area , I wrote this line of code
-					//cause we know t1+t2+t3 = 1 according to baricentric coordinates formula
-					//so we can reduce a division which improves performance
-					auto t3 = 1.f - t1 - t2;
+				//we can calculate t3 by this formula t3 = 1- t1 - t2
+				//so instead of t3 = c3 / area , I wrote this line of code
+				//cause we know t1+t2+t3 = 1 according to baricentric coordinates formula
+				//so we can reduce a division which improves performance
+				auto t3 = 1.f - t1 - t2;
 
-
-
+				if (t1 >= 0 && t2 >= 0 && t3 >= 0) {
+					
 #ifndef PERSPECTIVE_CORRECT
 					//Interpolate uv values to find the pixel uv using baricenteric coordinates				
 					//affine
@@ -329,12 +334,13 @@ void rasterize(std::vector<Vertex> vertices, Camera& camera, std::function<Color
 		auto& p3 = r3.position;
 
 		//Backface culling		
-		/*
-		auto c = glm::cross((p2 - p1), (p3 - p1));
-		if (glm::dot(camera.dir(), c) < 0) {
-			continue;
+		if (cullingMode == CullingMode::BackFace) {
+			auto c = glm::cross((p2 - p1), (p3 - p1));
+			if (glm::dot(camera.dir(), c) < 0) {
+				continue;
+			}
 		}
-		*/
+		
 
 
 		auto v1 = camera.vp() * glm::highp_vec4(p1, 1.0f);
