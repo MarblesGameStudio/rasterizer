@@ -360,9 +360,11 @@ void rasterize(std::vector<Vertex> vertices, Camera& camera, std::function<Color
 		v2 = (v2 + 1.0f) * 0.5f;
 		v3 = (v3 + 1.0f) * 0.5f;
 
-		float z1 = ((camera.v() * glm::vec4(p1, 1.f)).z) / (camera.far()-camera.near());
-		float z2 = ((camera.v() * glm::vec4(p2, 1.f)).z) / (camera.far() - camera.near());
-		float z3 = ((camera.v() * glm::vec4(p3, 1.f)).z) / (camera.far() - camera.near());
+		
+
+		float z1 = ((camera.v() * glm::vec4(p1, 1.f)).z) * camera.cameraLengthInverse();
+		float z2 = ((camera.v() * glm::vec4(p2, 1.f)).z) * camera.cameraLengthInverse();
+		float z3 = ((camera.v() * glm::vec4(p3, 1.f)).z) * camera.cameraLengthInverse();
 
 		//std::cout << z1 << std::endl;
 
@@ -437,6 +439,7 @@ int main(int argc, char* argv[])
 		else {
 
 
+
 			float deltaTime = (SDL_GetTicks() - ticks) * 0.001;
 
 			if (!paused) {
@@ -444,6 +447,8 @@ int main(int argc, char* argv[])
 
 			}
 			ticks = SDL_GetTicks();
+
+			auto renderPerformance = SDL_GetTicks();
 
 			begin();
 			clear(clearColor);
@@ -458,7 +463,14 @@ int main(int argc, char* argv[])
 			}
 
 			end();
+
+			renderPerformance = SDL_GetTicks() - renderPerformance;
+			std::cout << "render perf:" << renderPerformance << std::endl;
+
+			auto persentPerformance = SDL_GetTicks();			
 			present();
+			persentPerformance = SDL_GetTicks() - persentPerformance;
+			std::cout << "present perf:" << persentPerformance << std::endl;
 		}
 	} while (true);
 

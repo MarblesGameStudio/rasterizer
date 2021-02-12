@@ -14,13 +14,19 @@ private:
 	glm::highp_vec3 up;
 	glm::mat4 projection;
 	glm::mat4 view;
+	glm::mat4 viewprojection;
+
 	float fov;
 	float aspectRatio;
 	float nearClip;
 	float farClip;
 
+	float viewLengthInverse;
+
+	bool vpIsDirty;
+
 public:
-	Camera(){}
+	Camera() {}
 	Camera(float _fov, float _aspectRatio, float _nearClip, float _farClip) {
 		position = glm::highp_vec3(2.0f, 2.0f, 0.0f);
 		target = glm::highp_vec3(0.0f, 0.0f, 0.0f);
@@ -31,50 +37,70 @@ public:
 		farClip = _farClip;
 		projection = glm::mat4(1.0f);
 		view = glm::mat4(1.0f);
+
+		vpIsDirty = true;
 	}
 
-	void moveTo(float x, float y, float z) {
+	__forceinline void moveTo(float x, float y, float z) {
 		position = glm::highp_vec3(x, y, z);
+
+		vpIsDirty = true;
 	}
 
-	void lookAt(float x, float y, float z) {
+	__forceinline void lookAt(float x, float y, float z) {
 		target = glm::highp_vec3(x, y, z);
+
+		vpIsDirty = true;
 	}
 
 	/*
 		Angle is in degrees
 	*/
-	void rotateAroundTarget(float angle) {
+	__forceinline void rotateAroundTarget(float angle) {
 		glm::fquat q = glm::angleAxis(glm::radians(angle), glm::normalize(up));
 		position = target + q * position;
+
+		vpIsDirty = true;
 	}
 
-	glm::vec3 dir() {
+	__forceinline glm::vec3 dir() {
 		return (position - target);
 	}
 
-	glm::mat4 v() {
-		view = glm::lookAtLH(position, target, up);
+	__forceinline glm::mat4 v() {
+		if (vpIsDirty) {
+			clean();
+		}
 		return view;
 	}
 
-	glm::mat4 p() {
-		projection = glm::perspective(glm::radians(fov), aspectRatio, nearClip, farClip);		
-		return projection;
-	}
-
-	glm::mat4 vp() {
+	void clean() {
 		projection = glm::perspective(glm::radians(fov), aspectRatio, nearClip, farClip);
 		view = glm::lookAtLH(position, target, up);
-		return projection * view;
+		viewprojection = projection * view;
+		vpIsDirty = false;
+		viewLengthInverse = 1.0f / (far() - near());
 	}
 
-	float far() {
+	__forceinline glm::mat4 vp() {
+		if (vpIsDirty) {
+			clean();
+		}
+
+		return viewprojection;
+	}
+
+	__forceinline float cameraLengthInverse() {
+		return  viewLengthInverse;
+	}
+
+
+	__forceinline float far() {
 		return farClip;
 	}
 
 
-	float near() {
+	__forceinline float near() {
 		return nearClip;
 	}
 };
