@@ -25,7 +25,6 @@
 
 
 #define PERSPECTIVE_CORRECT
-//#define DEBUG_DEPTH
 
 #include "Camera.hpp"
 #include "Texture.h"
@@ -39,7 +38,7 @@ SDL_Surface* framebuffer;
 Texture* woodTexture;
 Texture* roomTexture;
 DepthBuffer* depthBuffer;
-
+bool depthDebugMode = false;
 
 
 
@@ -259,7 +258,7 @@ __forceinline void bariTriangle(
 				auto t3 = 1.f - t1 - t2;
 
 				if (t1 >= 0 && t2 >= 0 && t3 >= 0) {
-					
+
 #ifndef PERSPECTIVE_CORRECT
 					//Interpolate uv values to find the pixel uv using baricenteric coordinates				
 					//affine
@@ -287,26 +286,26 @@ __forceinline void bariTriangle(
 #endif			
 
 
+					if (!depthDebugMode) {
+						if (depthBuffer->get(x, y) > depth) {
+							depthBuffer->set(x, y, depth);
+							putPixel(x, y, fragmentShader(glm::fvec2(u, 1 - v), depth));
+						}
 
-#ifndef DEBUG_DEPTH
-					if (depthBuffer->get(x, y) > depth) {
-						depthBuffer->set(x, y, depth);
-						putPixel(x, y, fragmentShader(glm::fvec2(u, 1 - v), depth));
 					}
+					else {
 
-#else
+						int colorized_depth = (depth * 255);
 
-					int colorized_depth = (depth * 255);
+						Color c;
+						c.a = 255;
+						c.r = c.g = c.b = colorized_depth;
+						if (depthBuffer->get(x, y) > depth) {
+							depthBuffer->set(x, y, depth);
+							putPixel(x, y, c);
+						}
 
-					Color c;
-					c.a = 255;
-					c.r = c.g = c.b = colorized_depth;
-					if (depthBuffer->get(x, y) > depth) {
-						depthBuffer->set(x, y, depth);
-						putPixel(x, y, c);
 					}
-
-#endif						
 
 				}
 
@@ -340,7 +339,7 @@ void rasterize(std::vector<Vertex> vertices, Camera& camera, std::function<Color
 				continue;
 			}
 		}
-		
+
 
 
 		auto v1 = camera.vp() * glm::highp_vec4(p1, 1.0f);
@@ -366,7 +365,7 @@ void rasterize(std::vector<Vertex> vertices, Camera& camera, std::function<Color
 		v2 = (v2 + 1.0f) * 0.5f;
 		v3 = (v3 + 1.0f) * 0.5f;
 
-		
+
 
 		float z1 = ((camera.v() * glm::vec4(p1, 1.f)).z) * camera.cameraLengthInverse();
 		float z2 = ((camera.v() * glm::vec4(p2, 1.f)).z) * camera.cameraLengthInverse();
@@ -411,7 +410,7 @@ int main(int argc, char* argv[])
 
 	depthBuffer = new DepthBuffer(framebuffer->w, framebuffer->h, 1.f);
 
-	Camera camera(39.6f, framebuffer->w / (float)framebuffer->h, 0.01f, 100.0f);
+	Camera camera(39.6f, framebuffer->w / (float)framebuffer->h, 0.1f, 10.0f);
 	camera.moveTo(4.f, 4.f, -4.f);
 
 
@@ -436,6 +435,9 @@ int main(int argc, char* argv[])
 						polygonMode = PolygonMode::Fill;
 				}
 
+				if (ev.key.keysym.sym == SDLK_d)
+					depthDebugMode = !depthDebugMode;
+
 				if (ev.key.keysym.sym == SDLK_SPACE) {
 					paused = !paused;
 				}
@@ -456,7 +458,7 @@ int main(int argc, char* argv[])
 			}
 			ticks = SDL_GetTicks();
 
-			
+
 
 			begin();
 			clear(clearColor);
@@ -467,13 +469,13 @@ int main(int argc, char* argv[])
 			for (const auto& mesh : meshes) {
 				rasterize(mesh.vertices, camera, [](glm::fvec2 uv, float depth) {
 					return roomTexture->readColor(uv);
-				});
+					});
 			}
 
-			end();			
-					
+			end();
+
 			present();
-						
+
 		}
 
 		renderPerformance = SDL_GetTicks() - renderPerformance;
