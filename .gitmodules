@@ -1,0 +1,12 @@
+[submodule "deps/sdl2"]
+	path = deps/sdl2
+	url = https://github.com/libsdl-org/SDL.git
+[submodule "deps/glm"]
+	path = deps/glm
+	url = https://github.com/g-truc/glm.git
+[submodule "deps/tinyobjloader"]
+	path = deps/tinyobjloader
+	url = https://github.com/tinyobjloader/tinyobjloader.git
+[submodule "deps/stb"]
+	path = deps/stb
+	url = https://github.com/nothings/stb.git
