@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <string>
 
-#include <sdl/SDL.h>
+#include <SDL.h>
 #include <glm/vec2.hpp>
 
 #include <glm/vec3.hpp> 
