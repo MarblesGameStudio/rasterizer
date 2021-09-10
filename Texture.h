@@ -1,4 +1,5 @@
-#pragma once
+#ifndef TEXTURE_H
+#define TEXTURE_H
 
 #include <string>
 #include <vector>
@@ -19,3 +20,4 @@ public:
 	~Texture();
 };
 
+#endif

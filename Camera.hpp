@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CAMERA_HPP
+#define CAMERA_HPP
 
 #include <glm/vec3.hpp> 
 #include <glm/vec4.hpp> 
@@ -41,13 +42,13 @@ public:
 		vpIsDirty = true;
 	}
 
-	__forceinline void moveTo(float x, float y, float z) {
+	 void moveTo(float x, float y, float z) {
 		position = glm::highp_vec3(x, y, z);
 
 		vpIsDirty = true;
 	}
 
-	__forceinline void lookAt(float x, float y, float z) {
+	 void lookAt(float x, float y, float z) {
 		target = glm::highp_vec3(x, y, z);
 
 		vpIsDirty = true;
@@ -56,18 +57,18 @@ public:
 	/*
 		Angle is in degrees
 	*/
-	__forceinline void rotateAroundTarget(float angle) {
+	 void rotateAroundTarget(float angle) {
 		glm::fquat q = glm::angleAxis(glm::radians(angle), glm::normalize(up));
 		position = target + q * position;
 
 		vpIsDirty = true;
 	}
 
-	__forceinline glm::vec3 dir() {
+	 glm::vec3 dir() {
 		return (position - target);
 	}
 
-	__forceinline glm::mat4 v() {
+	 glm::mat4 v() {
 		if (vpIsDirty) {
 			clean();
 		}
@@ -82,7 +83,7 @@ public:
 		viewLengthInverse = 1.0f / (far() - near());
 	}
 
-	__forceinline glm::mat4 vp() {
+	 glm::mat4 vp() {
 		if (vpIsDirty) {
 			clean();
 		}
@@ -90,17 +91,19 @@ public:
 		return viewprojection;
 	}
 
-	__forceinline float cameraLengthInverse() {
+	 float cameraLengthInverse() {
 		return  viewLengthInverse;
 	}
 
 
-	__forceinline float far() {
+	 float far() {
 		return farClip;
 	}
 
 
-	__forceinline float near() {
+	 float near() {
 		return nearClip;
 	}
 };
+
+#endif

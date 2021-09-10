@@ -10,7 +10,7 @@ Texture::Texture(std::string filename) {
 
 }
 
-__forceinline int clamp(int value, int min, int max) {
+ int clamp(int value, int min, int max) {
 	if (value < min)
 		return min;
 	if (value > max)

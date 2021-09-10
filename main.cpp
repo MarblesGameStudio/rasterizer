@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <string>
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include <glm/vec2.hpp>
 
 #include <glm/vec3.hpp> 
@@ -52,7 +52,7 @@ void end() {
 		SDL_UnlockSurface(framebuffer);
 }
 
-__forceinline void putPixel(int x, int y, Color color) {
+void putPixel(int x, int y, Color color) {
 	if (x >= 0 && x < framebuffer->w && y >= 0 && y < framebuffer->h) {
 		((char*)framebuffer->pixels)[y * framebuffer->pitch + x * 4 + 0] = color.b;
 		((char*)framebuffer->pixels)[y * framebuffer->pitch + x * 4 + 1] = color.g;
@@ -204,14 +204,14 @@ CullingMode cullingMode = CullingMode::Disabled;
 
 
 
-__forceinline int edgeFunction(glm::ivec2 v1, glm::ivec2 v2, glm::ivec2 v3) {
+ int edgeFunction(glm::ivec2 v1, glm::ivec2 v2, glm::ivec2 v3) {
 	return (v3.x - v1.x) * (v2.y - v1.y) - (v3.y - v1.y) * (v2.x - v1.x);
 }
 
 /*
 Use baricentric coordinates to draw a triangle and fill in
 */
-__forceinline void bariTriangle(
+ void bariTriangle(
 	const glm::vec4& v1, const glm::vec4& v2, const glm::vec4& v3,
 	const glm::vec2& uv1, const glm::vec2& uv2, const glm::vec2& uv3,
 	float q1, float q2, float q3,
@@ -417,7 +417,6 @@ int main(int argc, char* argv[])
 	std::vector<Mesh> meshes;
 	loadScene("viking-room.obj", meshes);
 	std::vector<char> textureData;
-	//woodTexture = new Texture(std::string("wood.jpg"));
 	roomTexture = new Texture(std::string("texture.png"));
 
 	do {

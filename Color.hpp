@@ -1,4 +1,5 @@
-#pragma once
+#ifndef COLOR_HPP
+#define COLOR_HPP
 
 struct Color {
 	unsigned char b;
@@ -7,3 +8,4 @@ struct Color {
 	unsigned char a;
 };
 
+#endif

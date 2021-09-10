@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DEPTH_BUFFER_HPP
+#define DEPTH_BUFFER_HPP
 
 #include <vector>
 
@@ -22,20 +23,22 @@ public:
 		}
 	}
 
-	__forceinline void clear(float value) {
+	 void clear(float value) {
 		for (auto& v : data) {
 			v = value;
 		}
 	}
 
-	__forceinline void set(int x, int y, float value) {
+	 void set(int x, int y, float value) {
 		auto index = y * width + x;
 		data[index] = value;
 	}
 
-	__forceinline float get(int x, int y) {
+	 float get(int x, int y) {
 		auto index = y * width + x;
 		return data[index];
 	}
 	
 };
+
+#endif
